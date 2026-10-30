@@ -1,4 +1,4 @@
-full_hash=b923e93457dbdda82144a2b5cd0a01e43e07d20f
-short_hash=b923e93
-message=ci: register scheduled upstream sync on off-peak interval
-date=2026-10-27 15:47:39 +0800
+full_hash=07ec1aaa608be4924ab4f6239529c54b2589ce84
+short_hash=07ec1aa
+message=Merge pull request #443 from wan0ge/fix/config-csv-numbers-input
+date=2026-10-28 17:41:24 +0800
