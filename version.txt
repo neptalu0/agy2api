@@ -1,4 +1,4 @@
-full_hash=3681773e94fcd452453fa0283d1e81342ee82315
-short_hash=3681773
-message=修复多会话场景下上游 KV 缓存频繁失效的问题 (#450)
-date=2026-11-17 19:51:05 +0800
+full_hash=7a44dabaa776dbaffd5df8eda46febed71373739
+short_hash=7a44dab
+message=Merge remote-tracking branch 'origin/master'
+date=2026-11-18 16:15:24 +0800
