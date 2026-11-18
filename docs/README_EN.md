@@ -298,7 +298,7 @@ agy2api supports two storage backends: **Local SQLite (Default)** and **PostgreS
 Credentials are stored as structured database columns (no JSON blobs), keyed uniquely by **email**:
 `email`, `access_token`, `refresh_token`, `client_id`, `client_secret`, `project_id`, `expiry`, `tier`
 
-Import/export uses a standardized JSON format: `{"refresh_token": "...", "email": "...", "tier": "...", "project_id": "..."}` (only `refresh_token` is required; the rest are fetched automatically).
+Import/export uses a standardized JSON format: `{"refresh_token": "...", "access_token": "...", "expiry": "...", "email": "...", "tier": "...", "project_id": "..."}` (only `refresh_token` is required; an unexpired `access_token` is reused directly; the rest are fetched automatically).
 
 ### Environment Variable Configuration
 
@@ -355,7 +355,7 @@ Import/export uses a standardized JSON format: `{"refresh_token": "...", "email"
 **Credential Select Mode**
 - `CREDENTIAL_SELECT_MODE`: Credential selection mode (default: cache)
   - `random` — Fully random load balancing, each request picks a random credential
-  - `cache` — Cache affinity (recommended): hashes "model + system instruction (or first user message)" into a session key; the same session reuses the same credential, hitting Google's upstream prompt cache; automatically switches and rebinds after credential cooldown
+  - `cache` — Cache affinity (recommended): hashes "model + system instruction + first two messages' features" into a session key; the same session reuses the same credential, hitting Google's upstream prompt cache; automatically switches and rebinds after credential cooldown
   - `sticky` — Sticky: all requests lock onto one credential until it enters cooldown or gets disabled
 - `REDIS_URL`: Redis connection string (optional). When set, cache-mode session bindings are stored in Redis for multi-instance sharing; otherwise an in-process memory backend is used
 

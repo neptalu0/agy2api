@@ -1,4 +1,4 @@
-full_hash=9a3d74055a8dff64eec1dd3933822b5bdf7623c9
-short_hash=9a3d740
-message=更新版本
-date=2026-11-01 23:37:54 +0800
+full_hash=3681773e94fcd452453fa0283d1e81342ee82315
+short_hash=3681773
+message=修复多会话场景下上游 KV 缓存频繁失效的问题 (#450)
+date=2026-11-17 19:51:05 +0800

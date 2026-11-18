@@ -108,7 +108,7 @@ docker run -d --name agy2api --network host -e API_PASSWORD=api_pwd -e PANEL_PAS
 ### 📊 智能凭证管理系统
 
 - 多个 Google OAuth 凭证自动轮换（随机负载均衡）
-- 模型级冷却（429 错误自动设置对应模型家族的 CD：argon / gemini / claude+gpt 共享冷却）
+- 模型级冷却（429 错误自动设置对应模型家族的 CD：image / argon / gemini / claude+gpt 共享冷却）
 - 自动故障检测和凭证禁用
 - 凭证使用统计和配额/额度查询
 - 批量操作（启用、禁用、删除）
@@ -126,7 +126,7 @@ docker run -d --name agy2api --network host -e API_PASSWORD=api_pwd -e PANEL_PAS
 基于 React + Vite + Tailwind 编译的现代化前端界面：
 - Antigravity OAuth 认证流程（支持回调 URL 快捷方式）
 - 凭证文件上传（JSON/ZIP）、下载、详情查看
-- 凭证导出（规范 JSON：refresh_token/email/tier/project_id）
+- 凭证导出（规范 JSON：refresh_token/access_token/expiry/email/tier/project_id）
 - 系统配置管理（环境变量锁定提示、热更新）
 - 批量凭证操作和状态筛选、批量导入（缺失字段自动获取）
 - 移动端自适应
@@ -176,7 +176,7 @@ docker run -d --name agy2api --network host -e API_PASSWORD=api_pwd -e PANEL_PAS
 凭证以**邮箱（email）为唯一键**存储，字段为结构化数据库列（不再使用 JSON blob）：
 `email`、`access_token`、`refresh_token`、`client_id`、`client_secret`、`project_id`、`expiry`、`tier`
 
-凭证导入/导出使用规范 JSON 格式：`{"refresh_token": "...", "email": "...", "tier": "...", "project_id": "..."}`（仅 `refresh_token` 必填，其余字段可自动获取）。
+凭证导入/导出使用规范 JSON 格式：`{"refresh_token": "...", "access_token": "...", "expiry": "...", "email": "...", "tier": "...", "project_id": "..."}`（仅 `refresh_token` 必填，`access_token` 未过期时直接复用，其余字段可自动获取）。
 
 ### 环境变量配置
 
@@ -234,7 +234,7 @@ docker run -d --name agy2api --network host -e API_PASSWORD=api_pwd -e PANEL_PAS
 **凭证选择模式**
 - `CREDENTIAL_SELECT_MODE`: 凭证选择模式（默认：cache）
   - `random` — 完全随机负载均衡，每次请求随机挑选凭证
-  - `cache` — 缓存匹配（推荐）：以"模型 + system 指令（或首条 user 消息）"哈希会话 key，相同会话复用同一凭证，命中 Google 上游 prompt cache；凭证 CD 后自动切换并重新绑定
+  - `cache` — 缓存匹配（推荐）：以"模型 + system 指令 + 前两条消息特征"联合哈希会话 key，相同会话复用同一凭证，命中 Google 上游 prompt cache；凭证 CD 后自动切换并重新绑定
   - `sticky` — 凭证粘性：所有请求锁定同一凭证，直到其进入 CD 或被禁用
 - `REDIS_URL`: Redis 连接串（可选）。设置后缓存匹配的会话绑定存入 Redis，多实例共享；未设置时使用进程内存后端
 
