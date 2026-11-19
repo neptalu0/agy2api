@@ -1,4 +1,4 @@
-full_hash=60979cdb36fee7e63769a8b0c062f2f15d6bedbd
-short_hash=60979cd
-message=新增配置项 system_instruction_as_user_message：系统指令转首条 user 消息
-date=2026-11-18 17:54:33 +0800
+full_hash=0fee3616d133e6b607b54d9ccc6d2c18aa8e7070
+short_hash=0fee361
+message=Merge remote-tracking branch 'origin/master'
+date=2026-11-19 16:49:27 +0800
