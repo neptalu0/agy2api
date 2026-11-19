@@ -73,7 +73,7 @@ export function LanguageSwitch({ className = "" }) {
       title={lang === "zh" ? "Switch to English" : "切换为中文"}
     >
       <Globe size={14} className="text-purple-400" />
-      <span>{lang === "zh" ? "English" : "中文"}</span>
+      <span>{lang === "zh" ? "中文" : "English"}</span>
     </button>
   );
 }

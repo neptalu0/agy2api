@@ -61,12 +61,12 @@ export default function UploadPage() {
         <div className="mt-3 text-xs text-gray-500 bg-dark-800/60 rounded-lg p-3">
           <p className="mb-1 font-medium text-gray-400">{t("upload.formatTitle", "规范 JSON 格式：")}</p>
           <pre className="text-emerald-300/80 whitespace-pre-wrap font-mono">{`{
-  "refresh_token": "${t("upload.errorRequired", "必填")}",
-  "access_token": "${t("upload.errorOptional", "可选")}，未过期时直接复用",
-  "expiry": "${t("upload.errorOptional", "可选")}，access_token 过期时间",
-  "email": "${t("upload.errorOptional", "可选")}，缺失自动获取",
-  "tier": "${t("upload.errorOptional", "可选")}，缺失自动获取",
-  "project_id": "${t("upload.errorOptional", "可选")}，缺失自动获取"
+  "refresh_token": "${t("upload.specRefreshToken", "必填")}",
+  "access_token": "${t("upload.specAccessToken", "可选，未过期时直接复用")}",
+  "expiry": "${t("upload.specExpiry", "可选，access_token 过期时间")}",
+  "email": "${t("upload.specEmail", "可选，缺失自动获取")}",
+  "tier": "${t("upload.specTier", "可选，缺失自动获取")}",
+  "project_id": "${t("upload.specProjectId", "可选，缺失自动获取")}"
 }`}</pre>
           <p className="mt-2">{t("upload.formatTip", "refresh_token 无效的凭证将导入失败；同邮箱凭证自动去重（覆盖更新）。")}</p>
         </div>

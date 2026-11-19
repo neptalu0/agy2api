@@ -22,7 +22,7 @@ import api from "../api";
 import { useI18n } from "../i18n";
 
 export default function Credentials() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState({ total: 0, normal: 0, disabled: 0 });
   const [total, setTotal] = useState(0);
@@ -98,7 +98,7 @@ export default function Credentials() {
       showMessage("success", res.data.message);
       fetchCreds();
     } catch (err) {
-      showMessage("error", err.response?.data?.detail || "操作失败");
+      showMessage("error", err.response?.data?.detail || t("credentials.actionFailed", "操作失败"));
     } finally {
       setBusy(email, false);
     }
@@ -115,7 +115,7 @@ export default function Credentials() {
       showMessage(res.data.errors?.length ? "error" : "success", res.data.message);
       fetchCreds();
     } catch (err) {
-      showMessage("error", err.response?.data?.detail || "批量操作失败");
+      showMessage("error", err.response?.data?.detail || t("credentials.batchActionFailed", "批量操作失败"));
     } finally {
       setBusy("__batch__", false);
     }
@@ -131,18 +131,18 @@ export default function Credentials() {
           : 0;
         showMessage(
           "success",
-          `Project=${res.data.project_id}, Tier=${res.data.subscription_tier}, 模型数=${modelCount}`,
-          `检验成功: ${email}`
+          `Project=${res.data.project_id}, Tier=${res.data.subscription_tier}, ${t("credentials.modelCountLabel", "模型数")}=${modelCount}`,
+          `${t("credentials.verifySuccess", "检验成功")}: ${email}`
         );
       } else {
-        showMessage("error", res.data.message || res.data.error || "检验失败", `检验失败: ${email}`);
+        showMessage("error", res.data.message || res.data.error || t("credentials.verifyFailed", "检验失败"), `${t("credentials.verifyFailed", "检验失败")}: ${email}`);
       }
       fetchCreds();
     } catch (err) {
       showMessage(
         "error",
-        err.response?.data?.detail || err.response?.data?.error || err.response?.data?.message || "检验失败",
-        `检验失败: ${email}`
+        err.response?.data?.detail || err.response?.data?.error || err.response?.data?.message || t("credentials.verifyFailed", "检验失败"),
+        `${t("credentials.verifyFailed", "检验失败")}: ${email}`
       );
     } finally {
       setBusy(email, false);
@@ -163,8 +163,8 @@ export default function Credentials() {
     } catch (err) {
       showMessage(
         "error",
-        err.response?.data?.detail || "刷新模型列表失败",
-        `刷新失败: ${email}`
+        err.response?.data?.detail || t("credentials.refreshFailed", "刷新模型列表失败"),
+        `${t("credentials.refreshFailed", "刷新失败")}: ${email}`
       );
     } finally {
       setBusy(email, false);
@@ -178,19 +178,19 @@ export default function Credentials() {
       // 200 = 可用；429 = 限流但有效
       showMessage(
         "success",
-        res.data.message || (res.status === 429 ? "凭证被限流（429）但有效" : "凭证测试通过"),
-        `测试成功: ${email}`
+        res.data.message || (res.status === 429 ? t("credentials.rateLimitedButValid", "凭证被限流（429）但有效") : t("credentials.testPassed", "凭证测试通过")),
+        `${t("credentials.testSuccess", "测试成功")}: ${email}`
       );
       fetchCreds();
     } catch (err) {
       const data = err.response?.data || {};
       const status = err.response?.status;
       // 透明透传上游错误：优先后端返回的 error 原文
-      const upstreamError = data.error || data.detail || data.message || "测试失败";
+      const upstreamError = data.error || data.detail || data.message || t("credentials.testFailed", "测试失败");
       showMessage(
         status === 429 ? "info" : "error",
         `HTTP ${status}\n${upstreamError}`,
-        `测试失败: ${email}`
+        `${t("credentials.testFailed", "测试失败")}: ${email}`
       );
       fetchCreds();
     } finally {
@@ -208,12 +208,12 @@ export default function Credentials() {
         const aggregated = aggregateQuota(res.data.quotaGroups || []);
         setQuotaCache((prev) => ({ ...prev, [email]: aggregated }));
       } else {
-        setQuotaCache((prev) => ({ ...prev, [email]: { error: res.data.error || "获取额度失败" } }));
+        setQuotaCache((prev) => ({ ...prev, [email]: { error: res.data.error || t("credentials.fetchQuotaFailed", "获取额度失败") } }));
       }
     } catch (err) {
       setQuotaCache((prev) => ({
         ...prev,
-        [email]: { error: err.response?.data?.detail || err.response?.data?.error || "获取额度失败" },
+        [email]: { error: err.response?.data?.detail || err.response?.data?.error || t("credentials.fetchQuotaFailed", "获取额度失败") },
       }));
     } finally {
       setBusy(email, false);
@@ -247,7 +247,7 @@ export default function Credentials() {
         target.remaining += Math.round(minPct * 10) / 10;
         if (!target.resetTime && minResetTime) {
           try {
-            target.resetTime = new Date(minResetTime).toLocaleString("zh-CN");
+            target.resetTime = new Date(minResetTime).toLocaleString(lang === "zh" ? "zh-CN" : "en-US");
           } catch {
             target.resetTime = minResetTime;
           }
@@ -283,9 +283,9 @@ export default function Credentials() {
       a.download = `${email}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      showMessage("success", `已导出 ${email}.json`);
+      showMessage("success", t("credentials.exportedSuccess", `已导出 ${email}.json`, { email }));
     } catch (err) {
-      showMessage("error", err.response?.data?.detail || "导出失败");
+      showMessage("error", err.response?.data?.detail || t("credentials.exportFailed", "导出失败"));
     }
   };
 
@@ -302,7 +302,7 @@ export default function Credentials() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      showMessage("error", err.response?.data?.detail || "下载失败");
+      showMessage("error", err.response?.data?.detail || t("credentials.downloadFailed", "下载失败"));
     } finally {
       setBusy("__batch__", false);
     }
@@ -313,7 +313,7 @@ export default function Credentials() {
       const res = await api.get(`/creds/errors/${encodeURIComponent(email)}`);
       setErrorModal(res.data);
     } catch (err) {
-      showMessage("error", err.response?.data?.detail || "获取错误信息失败");
+      showMessage("error", err.response?.data?.detail || t("credentials.fetchErrorsFailed", "获取错误信息失败"));
     }
   };
 
@@ -618,7 +618,7 @@ export default function Credentials() {
                         })
                       }
                       className="text-purple-400 hover:text-purple-300 flex items-center gap-1 flex-shrink-0"
-                      title="点击查看或刷新该凭证支持的模型列表"
+                      title={t("credentials.titleModels", "点击查看或刷新该凭证支持的模型列表")}
                     >
                       <Cpu size={12} />
                       {cred.supported_models?.length
@@ -639,14 +639,14 @@ export default function Credentials() {
                       <button
                         onClick={() => verifyProject(cred.email)}
                         className="text-xs px-2 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center gap-1"
-                        title="检验 Project ID / Tier（可修复 403）"
+                        title={t("credentials.titleVerify", "检验 Project ID / Tier（可修复 403）")}
                       >
                         <Shield size={13} /> {t("credentials.btnVerify", "检验")}
                       </button>
                       <button
                         onClick={() => testCredential(cred.email)}
                         className="text-xs px-2 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center gap-1"
-                        title="测试凭证"
+                        title={t("credentials.titleTest", "测试凭证")}
                       >
                         <Zap size={13} /> {t("credentials.btnTest", "测试")}
                       </button>
@@ -654,14 +654,14 @@ export default function Credentials() {
                         onClick={() => openQuotaModal(cred.email)}
                         disabled={cred.disabled}
                         className="text-xs px-2 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center gap-1 disabled:opacity-40"
-                        title="查看额度"
+                        title={t("credentials.titleQuota", "查看额度")}
                       >
                         <BarChart3 size={13} /> {t("credentials.colQuota", "额度")}
                       </button>
                       <button
                         onClick={() => exportCredential(cred.email)}
                         className="text-xs px-2 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center gap-1"
-                        title="导出凭证（邮箱.json）"
+                        title={t("credentials.titleExport", "导出凭证（邮箱.json）")}
                       >
                         <Download size={13} /> {t("common.export", "导出")}
                       </button>
@@ -681,7 +681,7 @@ export default function Credentials() {
                       <button
                         onClick={() => doAction(cred.email, "delete")}
                         className="text-xs px-2 py-1.5 rounded-lg bg-red-600/10 hover:bg-red-600/20 text-red-400 flex items-center justify-center gap-1"
-                        title="删除"
+                        title={t("common.delete", "删除")}
                       >
                         <Trash2 size={13} /> {t("common.delete", "删除")}
                       </button>
@@ -776,13 +776,13 @@ export default function Credentials() {
       {quotaModal && (
         <Modal
           type="info"
-          title={`额度信息 - ${quotaModal.email}`}
+          title={t("credentials.quotaModalTitle", `额度信息 - ${quotaModal.email}`, { email: quotaModal.email })}
           onClose={() => setQuotaModal(null)}
         >
           {busyFiles.has(quotaModal.email) ? (
             <div className="flex items-center justify-center py-6 text-gray-500">
               <RefreshCw size={16} className="animate-spin mr-2" />
-              加载额度中...
+              {t("credentials.loadingQuota", "加载额度中...")}
             </div>
           ) : quotaCache[quotaModal.email]?.error ? (
             <div className="text-center py-4 text-red-400">{quotaCache[quotaModal.email].error}</div>
@@ -822,12 +822,12 @@ export default function Credentials() {
               )}
               {!quotaCache[quotaModal.email].claude?.count &&
                 !quotaCache[quotaModal.email].gemini?.count && (
-                  <div className="text-center py-3 text-gray-500">暂无额度数据</div>
+                  <div className="text-center py-3 text-gray-500">{t("credentials.noQuotaData", "暂无额度数据")}</div>
                 )}
               {(quotaCache[quotaModal.email].claude?.resetTime ||
                 quotaCache[quotaModal.email].gemini?.resetTime) && (
                 <div className="text-xs text-gray-500 text-right pt-1">
-                  重置:{" "}
+                  {t("credentials.quotaReset", "重置: ")}{" "}
                   {quotaCache[quotaModal.email].claude?.resetTime ||
                     quotaCache[quotaModal.email].gemini?.resetTime}
                 </div>
@@ -838,11 +838,11 @@ export default function Credentials() {
                 className="w-full text-xs text-gray-400 hover:text-white py-2 rounded-lg bg-dark-700 hover:bg-dark-600 flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
                 <RefreshCw size={12} className={busyFiles.has(quotaModal.email) ? "animate-spin" : ""} />
-                刷新额度
+                {t("credentials.refreshQuota", "刷新额度")}
               </button>
             </div>
           ) : (
-            <div className="text-center py-4 text-gray-500">加载中...</div>
+            <div className="text-center py-4 text-gray-500">{t("common.loading", "加载中...")}</div>
           )}
         </Modal>
       )}
@@ -860,7 +860,7 @@ export default function Credentials() {
             <div className="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-dark-700">
               <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base break-all">
                 <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
-                错误详情 - {errorModal.email}
+                {t("credentials.errorModalTitle", `错误详情 - ${errorModal.email}`, { email: errorModal.email })}
               </h3>
               <button
                 onClick={() => setErrorModal(null)}
@@ -871,13 +871,13 @@ export default function Credentials() {
             </div>
             <div className="p-4 sm:p-5 overflow-y-auto space-y-4">
               <div>
-                <div className="text-sm text-gray-400 mb-1">错误码</div>
+                <div className="text-sm text-gray-400 mb-1">{t("credentials.errorCode", "错误码")}</div>
                 <div className="text-red-400 text-sm">
-                  {(errorModal.error_codes || []).join(", ") || "无"}
+                  {(errorModal.error_codes || []).join(", ") || t("common.none", "无")}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-gray-400 mb-1">错误信息</div>
+                <div className="text-sm text-gray-400 mb-1">{t("credentials.errorMessage", "错误信息")}</div>
                 <pre className="bg-dark-800 border border-dark-600 rounded-lg p-3 sm:p-4 text-xs text-gray-300 overflow-auto max-h-56 whitespace-pre-wrap">
                   {JSON.stringify(errorModal.error_messages, null, 2)}
                 </pre>
@@ -890,7 +890,7 @@ export default function Credentials() {
                   }}
                   className="btn btn-primary text-sm"
                 >
-                  检验修复（重新获取Project ID）
+                  {t("credentials.btnVerifyRepair", "检验修复（重新获取Project ID）")}
                 </button>
                 <button
                   onClick={() => {
@@ -899,7 +899,7 @@ export default function Credentials() {
                   }}
                   className="btn btn-secondary text-sm"
                 >
-                  测试凭证
+                  {t("credentials.btnTestCred", "测试凭证")}
                 </button>
               </div>
             </div>

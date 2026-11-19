@@ -287,7 +287,7 @@ export default function Config() {
     if (isLocked) {
       return (
         <div className="text-xs text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-          该配置已被环境变量锁定，修改环境变量后重启生效
+          {t("config.envLocked", "该配置已被环境变量锁定，修改环境变量后重启生效")}
         </div>
       );
     }
@@ -308,24 +308,30 @@ export default function Config() {
               }`}
             />
           </button>
-          <span className="text-sm text-gray-300">{value ? "已启用" : "已禁用"}</span>
+          <span className="text-sm text-gray-300">
+            {value ? t("common.enabled", "已启用") : t("common.disabled", "已禁用")}
+          </span>
         </label>
       );
     }
 
     if (field.type === "select") {
-      const current = field.options.find((o) => o.value === value) || field.options[0];
+      const translatedOptions = field.options.map((opt) => ({
+        value: opt.value,
+        label: t(`config.fields.${field.key}.options.${opt.value}.label`, opt.label),
+      }));
+      const current = translatedOptions.find((o) => o.value === value) || translatedOptions[0];
       return (
         <div className="space-y-2">
           <Select
             value={current?.value ?? ""}
             onChange={(v) => setField(field.key, v)}
-            options={field.options}
+            options={translatedOptions}
             className="w-full sm:w-64"
           />
           {field.descriptions && current && (
             <div className="bg-dark-800/60 border border-dark-600 rounded-lg p-3 text-xs sm:text-sm text-gray-300 leading-relaxed">
-              {field.descriptions[current.value]}
+              {t(`config.fields.${field.key}.options.${current.value}.desc`, field.descriptions[current.value])}
             </div>
           )}
         </div>
@@ -337,7 +343,7 @@ export default function Config() {
         <CsvNumbersField
           value={value}
           onChange={(v) => setField(field.key, v)}
-          placeholder={field.placeholder}
+          placeholder={field.placeholder ? t(`config.fields.${field.key}.placeholder`, field.placeholder) : undefined}
         />
       );
     }
@@ -408,7 +414,7 @@ export default function Config() {
         <LinesField
           value={value}
           onChange={(v) => setField(field.key, v)}
-          placeholder={field.placeholder}
+          placeholder={field.placeholder ? t(`config.fields.${field.key}.placeholder`, field.placeholder) : undefined}
         />
       );
     }
@@ -423,7 +429,7 @@ export default function Config() {
             field.type === "number" ? Number(e.target.value) : e.target.value
           )
         }
-        placeholder={field.placeholder}
+        placeholder={field.placeholder ? t(`config.fields.${field.key}.placeholder`, field.placeholder) : undefined}
         className="w-full px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm text-white placeholder-gray-500"
       />
     );
@@ -497,11 +503,13 @@ export default function Config() {
                   .map((field) => (
                     <div key={field.key}>
                       <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                        {field.label}
+                        {t(`config.fields.${field.key}.label`, field.label)}
                       </label>
                       {renderField(field)}
                       {field.note && (
-                        <p className="text-xs text-gray-500 mt-1.5">{field.note}</p>
+                        <p className="text-xs text-gray-500 mt-1.5">
+                          {t(`config.fields.${field.key}.note`, field.note)}
+                        </p>
                       )}
                     </div>
                   ))}

@@ -80,7 +80,7 @@ export default function UsageLogs() {
       setItems(res.data.items);
       setTotal(res.data.total);
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.detail || "加载日志失败" });
+      setMessage({ type: "error", text: err.response?.data?.detail || t("usageLogs.loadFailed", "加载日志失败") });
     } finally {
       setLoading(false);
     }
@@ -152,7 +152,7 @@ export default function UsageLogs() {
       setDetailBody(res.data);
     } catch (err) {
       // 文件可能已被清理或手动删除，仅在详情弹窗内提示，不弹全局错误
-      setDetailBody({ __missing: true, __message: err.response?.data?.detail || "详细日志文件不存在或已清理" });
+      setDetailBody({ __missing: true, __message: err.response?.data?.detail || t("usageLogs.detailBodyMissing", "详细日志文件不存在或已清理") });
     } finally {
       setDetailBodyLoading(false);
     }
@@ -333,7 +333,7 @@ export default function UsageLogs() {
                     </span>
                     <span className="text-sm font-medium text-gray-200 truncate">{item.model_name || "(unknown)"}</span>
                       {item.upstream_model_name && item.upstream_model_name !== item.model_name && (
-                        <span className="text-xs text-gray-500 truncate" title="后端真实模型名">→ {item.upstream_model_name}</span>
+                        <span className="text-xs text-gray-500 truncate" title={t("usageLogs.realModelTitle", "后端真实模型名")}>→ {item.upstream_model_name}</span>
                       )}
                       <span className="text-xs px-1.5 py-0.5 rounded bg-dark-700 text-gray-400">
                         {item.api_format === "openai" ? "OpenAI" : item.api_format === "gemini" ? "Gemini" : item.api_format === "anthropic" ? "Claude" : item.api_format || "?"}
@@ -353,7 +353,7 @@ export default function UsageLogs() {
                     ↑{formatTokens(item.prompt_tokens)} ↓{formatTokens(item.completion_tokens)}
                   </div>
                   {item.cached_tokens > 0 && (
-                    <div className="text-emerald-500/80" title="Prompt 中命中缓存的 token">
+                    <div className="text-emerald-500/80" title={t("usageLogs.cachedTokenTitle", "Prompt 中命中缓存的 token")}>
                       {t("usageLogs.cachedBadge", `⚡缓存 ${formatTokens(item.cached_tokens)}`, { tokens: formatTokens(item.cached_tokens) })}
                     </div>
                   )}
@@ -477,26 +477,26 @@ export default function UsageLogs() {
             </p>
             <div className="space-y-3 text-xs">
               <div>
-                <div className="text-gray-400 mb-1">请求 URL</div>
+                <div className="text-gray-400 mb-1">{t("usageLogs.reqUrl", "请求 URL")}</div>
                 <pre className="bg-dark-800 border border-dark-600 rounded-lg p-2.5 overflow-x-auto text-gray-200 whitespace-pre-wrap break-all">{detailBody.url || "-"}</pre>
               </div>
               <div>
-                <div className="text-gray-400 mb-1">请求头（已脱敏）</div>
+                <div className="text-gray-400 mb-1">{t("usageLogs.reqHeaders", "请求头（已脱敏）")}</div>
                 <pre className="bg-dark-800 border border-dark-600 rounded-lg p-2.5 overflow-x-auto text-gray-200">{JSON.stringify(detailBody.request_headers || {}, null, 2)}</pre>
               </div>
               <div>
-                <div className="text-gray-400 mb-1">请求体</div>
+                <div className="text-gray-400 mb-1">{t("usageLogs.reqBody", "请求体")}</div>
                 <pre className="bg-dark-800 border border-dark-600 rounded-lg p-2.5 overflow-x-auto text-gray-200">{JSON.stringify(detailBody.request_body ?? {}, null, 2)}</pre>
               </div>
               {detailBody.response_body && (
                 <div>
-                  <div className="text-gray-400 mb-1">上游响应</div>
+                  <div className="text-gray-400 mb-1">{t("usageLogs.upstreamResponse", "上游响应")}</div>
                   <pre className="bg-dark-800 border border-dark-600 rounded-lg p-2.5 overflow-x-auto text-gray-200 whitespace-pre-wrap break-all">{formatMaybeJson(detailBody.response_body)}</pre>
                 </div>
               )}
               {detailBody.error_message && (
                 <div>
-                  <div className="text-gray-400 mb-1">错误摘要</div>
+                  <div className="text-gray-400 mb-1">{t("usageLogs.errorSummary", "错误摘要")}</div>
                   <pre className="bg-red-500/10 border border-red-500/30 rounded-lg p-2.5 overflow-x-auto text-red-300 whitespace-pre-wrap break-all">{detailBody.error_message}</pre>
                 </div>
               )}
