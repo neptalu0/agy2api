@@ -1,4 +1,4 @@
-full_hash=e8c3e0ad95cb370fdec4b6024907bacc3bb65605
-short_hash=e8c3e0a
-message=fix(i18n): translate all configuration fields, notes, modals, and button titles
-date=2026-11-19 19:23:40 +0800
+full_hash=8ebcdfb9e4746442b99a28e250f88e70cc8e432f
+short_hash=8ebcdfb
+message=fix(i18n): translate backend operation responses and toast messages
+date=2026-11-19 19:49:40 +0800
