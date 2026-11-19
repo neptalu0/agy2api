@@ -1,4 +1,4 @@
-full_hash=8ebcdfb9e4746442b99a28e250f88e70cc8e432f
-short_hash=8ebcdfb
-message=fix(i18n): translate backend operation responses and toast messages
-date=2026-11-19 19:49:40 +0800
+full_hash=158f95f8119f8c02b9c004ae2b7c227231c3809f
+short_hash=158f95f
+message=fix(i18n): complete audit and localization for all buttons, modals, and backend error details
+date=2026-11-19 20:19:24 +0800
