@@ -76,9 +76,21 @@ export function I18nProvider({ children }) {
       "缺少 refresh_token": t("upload.missingRefreshToken", "缺少 refresh_token"),
       "无法获取邮箱（JSON 中未提供且自动获取失败）": t("upload.failedEmailFetch", "无法获取邮箱（JSON 中未提供且自动获取失败）"),
       "JSON格式错误: 顶层必须是对象": t("upload.jsonNotObject", "JSON格式错误: 顶层必须是对象"),
+      "ZIP文件中没有找到JSON文件": t("upload.noJsonInZip", "ZIP文件中没有找到JSON文件"),
+      "无效的ZIP文件格式": t("upload.invalidZip", "无效的ZIP文件格式"),
+      "请选择要上传的文件": t("upload.chooseFiles", "请选择要上传的文件"),
       "凭证列表不能为空": t("credentials.emptyCredsList", "凭证列表不能为空"),
       "凭证不存在": t("credentials.credNotFound", "凭证不存在"),
+      "凭证中没有访问令牌": t("credentials.noAccessToken", "凭证中没有访问令牌"),
+      "凭证中没有项目ID": t("credentials.noProjectId", "凭证中没有项目ID"),
+      "启用凭证失败，可能凭证不存在": t("credentials.enableFailed", "启用凭证失败，可能凭证不存在"),
+      "禁用凭证失败，可能凭证不存在": t("credentials.disableFailed", "禁用凭证失败，可能凭证不存在"),
+      "获取凭证模型列表失败，请检查凭证是否有效": t("credentials.fetchModelsFailed", "获取凭证模型列表失败，请检查凭证是否有效"),
+      "密码错误": t("login.wrongPassword", "密码错误"),
+      "请提供有效的回调URL": t("oauth.callbackEmpty", "请粘贴完整的回调URL"),
+      "Project ID 不能为空": t("oauth.projectIdEmpty", "Project ID 不能为空"),
       "无效的操作类型": t("common.invalidAction", "无效的操作类型"),
+      "详细日志文件不存在或已清理": t("usageLogs.detailBodyMissing", "详细日志文件不存在或已清理"),
       "该配置已被环境变量锁定，修改环境变量后重启生效": t("config.envLocked", "该配置已被环境变量锁定，修改环境变量后重启生效"),
     };
 
@@ -108,6 +120,15 @@ export function I18nProvider({ children }) {
     }
     if ((m = str.match(/^refresh_token\s*无效[：:]\s*(.*)$/))) {
       return t("upload.invalidRefreshToken", "refresh_token 无效: {detail}", { detail: m[1] });
+    }
+    if ((m = str.match(/^文件\s*(.+)\s*格式不支持/))) {
+      return t("upload.unsupportedFormat", "文件 {filename} 格式不支持，只支持JSON和ZIP文件", { filename: m[1] });
+    }
+    if ((m = str.match(/^文件数量过多[，,]\s*最多支持100个文件[，,]\s*当前[：:]\s*(\d+)\s*个/))) {
+      return t("upload.tooManyFiles", "文件数量过多，最多支持100个文件，当前：{count}个", { count: m[1] });
+    }
+    if ((m = str.match(/^获取额度失败[：:]\s*(.*)$/))) {
+      return `${t("credentials.fetchQuotaFailed", "获取额度失败")}: ${m[1]}`;
     }
     if ((m = str.match(/^测试失败[：:]\s*HTTP\s*(\d+)/))) {
       return t("credentials.testFailedHttp", "测试失败: HTTP {status}", { status: m[1] });
