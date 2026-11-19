@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "../components/Modal";
 import Select from "../components/Select";
 import api from "../api";
+import { useI18n } from "../i18n";
 
 // 错误码输入：编辑期间保留原始文本，仅在按键时把已解析的数组回写配置（保证保存时取到最新值），
 // 失焦时再归一化显示。原实现在每次按键即时解析并回写数组，导致分隔符与未成形的中间输入被即时
@@ -203,6 +204,7 @@ const CONFIG_GROUPS = [
 ];
 
 export default function Config() {
+  const { t } = useI18n();
   const [config, setConfig] = useState({});
   const [envLocked, setEnvLocked] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -221,7 +223,7 @@ export default function Config() {
       setEnvLocked(res.data.env_locked || []);
       if (!silent) setMessage(null);
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.detail || "加载配置失败" });
+      setMessage({ type: "error", text: err.response?.data?.detail || t("config.loadFailed", "加载配置失败") });
     } finally {
       setLoading(false);
     }
@@ -231,11 +233,11 @@ export default function Config() {
     setSaving(true);
     try {
       const res = await api.post("/config/save", { config });
-      setMessage({ type: "success", text: res.data.message || "配置保存成功" });
+      setMessage({ type: "success", text: res.data.message || t("config.saved", "配置保存成功") });
       // 静默刷新配置（不清空刚显示的弹窗消息）
       await loadConfig({ silent: true });
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.detail || "保存配置失败" });
+      setMessage({ type: "error", text: err.response?.data?.detail || t("config.saveFailed", "保存配置失败") });
     } finally {
       setSaving(false);
     }
@@ -359,7 +361,7 @@ export default function Config() {
         <div className="space-y-2">
           {rules.length === 0 && (
             <div className="text-xs text-gray-500 bg-dark-800/60 border border-dark-700 rounded-lg px-3 py-2">
-              暂无规则，点击下方按钮新增
+              {t("config.noRules", "暂无规则，点击下方按钮新增")}
             </div>
           )}
           {rules.map((rule, idx) => (
@@ -368,7 +370,7 @@ export default function Config() {
                 type="text"
                 value={rule[0]}
                 onChange={(e) => updateRule(idx, 0, e.target.value)}
-                placeholder="匹配正则，如 ^gpt-4$"
+                placeholder={t("config.rulePatternPlaceholder", "匹配正则，如 ^gpt-4$")}
                 className="flex-1 min-w-0 px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm text-white placeholder-gray-500 font-mono"
               />
               <span className="text-gray-500 text-sm shrink-0">→</span>
@@ -376,14 +378,14 @@ export default function Config() {
                 type="text"
                 value={rule[1]}
                 onChange={(e) => updateRule(idx, 1, e.target.value)}
-                placeholder="替换模型名，如 gemini-2.5-pro"
+                placeholder={t("config.ruleReplacementPlaceholder", "替换模型名，如 gemini-2.5-pro")}
                 className="flex-1 min-w-0 px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm text-white placeholder-gray-500 font-mono"
               />
               <button
                 type="button"
                 onClick={() => removeRule(idx)}
                 className="shrink-0 p-2 text-gray-500 hover:text-red-400 transition-colors"
-                title="删除该规则"
+                title={t("config.deleteRule", "删除该规则")}
               >
                 <Trash2 size={16} />
               </button>
@@ -395,7 +397,7 @@ export default function Config() {
             className="btn btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5"
           >
             <Plus size={14} />
-            新增规则
+            {t("config.addRule", "新增规则")}
           </button>
         </div>
       );
@@ -438,7 +440,7 @@ export default function Config() {
           className="btn btn-secondary text-sm flex items-center gap-1.5"
         >
           <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          刷新配置
+          {t("config.reload", "刷新配置")}
         </button>
         <button
           onClick={saveConfig}
@@ -446,14 +448,14 @@ export default function Config() {
           className="btn btn-primary text-sm flex items-center gap-1.5 disabled:opacity-50"
         >
           {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-          {saving ? "保存中..." : "保存配置"}
+          {saving ? t("config.saving", "保存中...") : t("config.save", "保存配置")}
         </button>
         </div>
       </div>
 
       {/* 消息弹窗 */}
       {message && (
-        <Modal type={message.type} title={message.type === "success" ? "操作成功" : "操作失败"} onClose={() => setMessage(null)}>
+        <Modal type={message.type} title={message.type === "success" ? t("common.success", "操作成功") : t("common.error", "操作失败")} onClose={() => setMessage(null)}>
           <span className="whitespace-pre-wrap break-all">{message.text}</span>
         </Modal>
       )}
@@ -467,7 +469,7 @@ export default function Config() {
           {CONFIG_GROUPS.map((group) => (
             <div key={group.title} className="card">
               <h3 className="text-base font-semibold text-purple-400 mb-4 border-b border-dark-700 pb-3">
-                {group.title}
+                {t(`config.groups.${group.title}`, group.title)}
               </h3>
 
               {group.title === "端点配置" && (
@@ -477,14 +479,14 @@ export default function Config() {
                     onClick={useMirrorUrls}
                     className="btn btn-secondary text-xs px-3 py-1.5"
                   >
-                    🚀 一键使用镜像网址
+                    {t("config.useMirror", "🚀 一键使用镜像网址")}
                   </button>
                   <button
                     type="button"
                     onClick={restoreOfficialUrls}
                     className="btn btn-secondary text-xs px-3 py-1.5"
                   >
-                    🔄 还原官方端点
+                    {t("config.restoreOfficial", "🔄 还原官方端点")}
                   </button>
                 </div>
               )}

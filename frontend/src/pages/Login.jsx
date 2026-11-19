@@ -1,8 +1,10 @@
 import { Eye, EyeOff, Rocket } from "lucide-react";
 import { useState } from "react";
 import api from "../api";
+import { LanguageSwitch, useI18n } from "../i18n";
 
 export default function Login({ onSuccess }) {
+  const { t } = useI18n();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -18,27 +20,30 @@ export default function Login({ onSuccess }) {
       localStorage.setItem("panelToken", res.data.token);
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.detail || "登录失败");
+      setError(err.response?.data?.detail || t("login.failed", "登录失败"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitch />
+      </div>
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-600/20 mb-4">
             <Rocket className="w-10 h-10 text-purple-400" />
           </div>
-          <h1 className="text-3xl font-bold text-white">AGY2API</h1>
-          <p className="text-gray-400 mt-2">Antigravity API 代理服务控制面板</p>
+          <h1 className="text-3xl font-bold text-white">{t("login.title", "AGY2API")}</h1>
+          <p className="text-gray-400 mt-2">{t("login.subtitle", "Antigravity API 代理服务控制面板")}</p>
         </div>
 
         {/* 登录卡片 */}
         <div className="card">
-          <h2 className="text-xl font-semibold mb-6 text-center">登录控制面板</h2>
+          <h2 className="text-xl font-semibold mb-6 text-center">{t("login.cardTitle", "登录控制面板")}</h2>
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-4">
@@ -49,7 +54,7 @@ export default function Login({ onSuccess }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                密码
+                {t("login.passwordLabel", "密码")}
               </label>
               <div className="relative">
                 <input
@@ -57,7 +62,7 @@ export default function Login({ onSuccess }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white placeholder-gray-500 pr-12"
-                  placeholder="请输入控制面板密码"
+                  placeholder={t("login.passwordPlaceholder", "请输入控制面板密码")}
                   required
                 />
                 <button
@@ -78,7 +83,7 @@ export default function Login({ onSuccess }) {
               {loading ? (
                 <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
               ) : (
-                "登录"
+                t("login.submit", "登录")
               )}
             </button>
           </form>

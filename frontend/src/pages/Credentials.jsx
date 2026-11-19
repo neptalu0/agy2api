@@ -19,8 +19,10 @@ import { useCallback, useEffect, useState } from "react";
 import Modal from "../components/Modal";
 import Select from "../components/Select";
 import api from "../api";
+import { useI18n } from "../i18n";
 
 export default function Credentials() {
+  const { t } = useI18n();
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState({ total: 0, normal: 0, disabled: 0 });
   const [total, setTotal] = useState(0);
@@ -66,19 +68,19 @@ export default function Credentials() {
       setStats(res.data.stats || { total: 0, normal: 0, disabled: 0 });
       setSelected(new Set());
     } catch (err) {
-      showMessage("error", err.response?.data?.detail || "加载凭证失败");
+      showMessage("error", err.response?.data?.detail || t("credentials.loadFailed", "加载凭证失败"));
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, statusFilter, errorCodeFilter, cooldownFilter, tierFilter]);
+  }, [page, pageSize, statusFilter, errorCodeFilter, cooldownFilter, tierFilter, t]);
 
   useEffect(() => {
     fetchCreds();
   }, [fetchCreds]);
 
   const showMessage = useCallback((type, text, title) => {
-    setMessage({ type, text, title: title || (type === "success" ? "操作成功" : type === "error" ? "操作失败" : "提示") });
-  }, []);
+    setMessage({ type, text, title: title || (type === "success" ? t("common.success", "操作成功") : type === "error" ? t("common.error", "操作失败") : t("common.info", "提示")) });
+  }, [t]);
 
   const setBusy = (email, busy) => {
     setBusyFiles((prev) => {
@@ -373,15 +375,15 @@ export default function Credentials() {
       <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <div className="bg-dark-800 border border-dark-600 rounded-xl p-3 sm:p-4 text-center">
           <div className="text-xl sm:text-2xl font-bold text-white">{stats.total}</div>
-          <div className="text-xs text-gray-500 mt-0.5">总计</div>
+          <div className="text-xs text-gray-500 mt-0.5">{t("credentials.statTotal", "总计")}</div>
         </div>
         <div className="bg-emerald-900/20 border border-emerald-700/30 rounded-xl p-3 sm:p-4 text-center">
           <div className="text-xl sm:text-2xl font-bold text-emerald-400">{stats.normal}</div>
-          <div className="text-xs text-gray-500 mt-0.5">正常</div>
+          <div className="text-xs text-gray-500 mt-0.5">{t("credentials.statNormal", "正常")}</div>
         </div>
         <div className="bg-red-900/20 border border-red-700/30 rounded-xl p-3 sm:p-4 text-center">
           <div className="text-xl sm:text-2xl font-bold text-red-400">{stats.disabled}</div>
-          <div className="text-xs text-gray-500 mt-0.5">禁用</div>
+          <div className="text-xs text-gray-500 mt-0.5">{t("credentials.statDisabled", "禁用")}</div>
         </div>
       </div>
 
@@ -393,7 +395,7 @@ export default function Credentials() {
           className="btn btn-secondary text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-1.5"
         >
           <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          刷新状态
+          {t("credentials.refreshStatus", "刷新状态")}
         </button>
         <button
           onClick={downloadAll}
@@ -401,7 +403,7 @@ export default function Credentials() {
           className="btn btn-secondary text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-1.5"
         >
           <Download size={15} />
-          打包导出
+          {t("credentials.exportPackage", "打包导出")}
         </button>
       </div>
 
@@ -415,9 +417,9 @@ export default function Credentials() {
           }}
           className="w-full sm:w-32"
           options={[
-            { value: "all", label: "全部凭证" },
-            { value: "enabled", label: "仅启用" },
-            { value: "disabled", label: "仅禁用" },
+            { value: "all", label: t("credentials.filterAllCreds", "全部凭证") },
+            { value: "enabled", label: t("credentials.filterEnabledOnly", "仅启用") },
+            { value: "disabled", label: t("credentials.filterDisabledOnly", "仅禁用") },
           ]}
         />
         <Select
@@ -428,8 +430,8 @@ export default function Credentials() {
           }}
           className="w-full sm:w-32"
           options={[
-            { value: "all", label: "错误码: 全部" },
-            { value: "none", label: "无错误" },
+            { value: "all", label: t("credentials.filterErrorAll", "错误码: 全部") },
+            { value: "none", label: t("credentials.filterErrorNone", "无错误") },
             { value: "400", label: "400" },
             { value: "403", label: "403" },
             { value: "429", label: "429" },
@@ -444,9 +446,9 @@ export default function Credentials() {
           }}
           className="w-full sm:w-32"
           options={[
-            { value: "all", label: "冷却: 全部" },
-            { value: "in_cooldown", label: "CD中" },
-            { value: "no_cooldown", label: "未CD" },
+            { value: "all", label: t("credentials.filterCooldownAll", "冷却: 全部") },
+            { value: "in_cooldown", label: t("credentials.filterInCooldown", "CD中") },
+            { value: "no_cooldown", label: t("credentials.filterNoCooldown", "未CD") },
           ]}
         />
         <Select
@@ -457,7 +459,7 @@ export default function Credentials() {
           }}
           className="w-full sm:w-32"
           options={[
-            { value: "all", label: "Tier: 全部" },
+            { value: "all", label: t("credentials.filterTierAll", "Tier: 全部") },
             { value: "free", label: "Free" },
             { value: "pro", label: "Pro" },
             { value: "ultra", label: "Ultra" },
@@ -472,7 +474,7 @@ export default function Credentials() {
           className="w-full sm:w-32"
           options={[20, 50, 100, 200, 500, 1000].map((n) => ({
             value: n,
-            label: `每页 ${n}`,
+            label: t("credentials.perPage", `每页 ${n}`, { n }),
           }))}
         />
       </div>
@@ -487,37 +489,37 @@ export default function Credentials() {
               onChange={toggleSelectAll}
               className="accent-purple-600 w-4 h-4"
             />
-            全选
+            {t("credentials.selectAll", "全选")}
           </label>
-          <span className="text-gray-500 text-xs">已选 {selected.size} 项</span>
+          <span className="text-gray-500 text-xs">{t("credentials.selectedCount", `已选 ${selected.size} 项`, { count: selected.size })}</span>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => doBatchAction("enable")}
               disabled={selected.size === 0 || busyFiles.has("__batch__")}
               className="btn btn-secondary text-xs px-3 py-1.5 disabled:opacity-40"
             >
-              批量启用
+              {t("credentials.batchEnable", "批量启用")}
             </button>
             <button
               onClick={() => doBatchAction("disable")}
               disabled={selected.size === 0 || busyFiles.has("__batch__")}
               className="btn btn-secondary text-xs px-3 py-1.5 disabled:opacity-40"
             >
-              批量禁用
+              {t("credentials.batchDisable", "批量禁用")}
             </button>
             <button
               onClick={() => doBatchAction("refresh_models")}
               disabled={selected.size === 0 || busyFiles.has("__batch__")}
               className="btn btn-secondary text-xs px-3 py-1.5 disabled:opacity-40"
             >
-              批量刷新模型
+              {t("credentials.batchRefreshModels", "批量刷新模型")}
             </button>
             <button
               onClick={() => doBatchAction("delete")}
               disabled={selected.size === 0 || busyFiles.has("__batch__")}
               className="btn btn-danger text-xs px-3 py-1.5 disabled:opacity-40"
             >
-              批量删除
+              {t("credentials.batchDelete", "批量删除")}
             </button>
           </div>
         </div>
@@ -530,7 +532,7 @@ export default function Credentials() {
         </div>
       ) : items.length === 0 ? (
         <div className="card text-center py-12 text-gray-500 text-sm">
-          没有凭证。请先通过 OAuth 认证或批量导入添加凭证。
+          {t("credentials.emptyCreds", "没有凭证。请先通过 OAuth 认证或批量导入添加凭证。")}
         </div>
       ) : (
         <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
@@ -564,11 +566,11 @@ export default function Credentials() {
                       </span>
                       {cred.disabled ? (
                         <span className="text-red-400 text-xs flex items-center gap-1">
-                          <Ban size={12} /> 禁用
+                          <Ban size={12} /> {t("common.disabled", "禁用")}
                         </span>
                       ) : (
                         <span className="text-emerald-400 text-xs flex items-center gap-1">
-                          <CheckCircle size={12} /> 启用
+                          <CheckCircle size={12} /> {t("common.enabled", "启用")}
                         </span>
                       )}
                     </div>
@@ -584,7 +586,7 @@ export default function Credentials() {
                       </span>
                     ) : (
                       <span className="text-gray-600 flex items-center gap-1">
-                        <Clock size={12} /> 无CD
+                        <Clock size={12} /> {t("credentials.filterNoCooldown", "无CD")}
                       </span>
                     )}
                     {cred.error_codes?.length ? (
@@ -597,7 +599,7 @@ export default function Credentials() {
                       </button>
                     ) : (
                       <span className="text-gray-600 flex items-center gap-1">
-                        <CheckCircle size={12} /> 无错误
+                        <CheckCircle size={12} /> {t("credentials.filterErrorNone", "无错误")}
                       </span>
                     )}
                   </div>
@@ -620,8 +622,8 @@ export default function Credentials() {
                     >
                       <Cpu size={12} />
                       {cred.supported_models?.length
-                        ? `模型 ${cred.supported_models.length}`
-                        : "模型未检测"}
+                        ? t("credentials.modelCount", `模型 ${cred.supported_models.length}`, { count: cred.supported_models.length })
+                        : t("credentials.modelsUndetected", "模型未检测")}
                     </button>
                   </div>
                 </div>
@@ -639,14 +641,14 @@ export default function Credentials() {
                         className="text-xs px-2 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center gap-1"
                         title="检验 Project ID / Tier（可修复 403）"
                       >
-                        <Shield size={13} /> 检验
+                        <Shield size={13} /> {t("credentials.btnVerify", "检验")}
                       </button>
                       <button
                         onClick={() => testCredential(cred.email)}
                         className="text-xs px-2 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center gap-1"
                         title="测试凭证"
                       >
-                        <Zap size={13} /> 测试
+                        <Zap size={13} /> {t("credentials.btnTest", "测试")}
                       </button>
                       <button
                         onClick={() => openQuotaModal(cred.email)}
@@ -654,14 +656,14 @@ export default function Credentials() {
                         className="text-xs px-2 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center gap-1 disabled:opacity-40"
                         title="查看额度"
                       >
-                        <BarChart3 size={13} /> 额度
+                        <BarChart3 size={13} /> {t("credentials.colQuota", "额度")}
                       </button>
                       <button
                         onClick={() => exportCredential(cred.email)}
                         className="text-xs px-2 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center gap-1"
                         title="导出凭证（邮箱.json）"
                       >
-                        <Download size={13} /> 导出
+                        <Download size={13} /> {t("common.export", "导出")}
                       </button>
                       <button
                         onClick={() =>
@@ -674,14 +676,14 @@ export default function Credentials() {
                         }`}
                       >
                         {cred.disabled ? <CheckCircle size={13} /> : <Ban size={13} />}
-                        {cred.disabled ? "启用" : "禁用"}
+                        {cred.disabled ? t("common.enabled", "启用") : t("common.disabled", "禁用")}
                       </button>
                       <button
                         onClick={() => doAction(cred.email, "delete")}
                         className="text-xs px-2 py-1.5 rounded-lg bg-red-600/10 hover:bg-red-600/20 text-red-400 flex items-center justify-center gap-1"
                         title="删除"
                       >
-                        <Trash2 size={13} /> 删除
+                        <Trash2 size={13} /> {t("common.delete", "删除")}
                       </button>
                     </>
                   )}
@@ -696,7 +698,7 @@ export default function Credentials() {
       {total > pageSize && (
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500 text-xs sm:text-sm">
-            共 {total} 个凭证，第 {page}/{totalPages} 页
+            {t("credentials.paginationTotal", `共 ${total} 个凭证，第 ${page}/${totalPages} 页`, { total, page, totalPages })}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -704,7 +706,7 @@ export default function Credentials() {
               disabled={page <= 1}
               className="btn btn-secondary text-xs px-3 py-1.5 disabled:opacity-40"
             >
-              上一页
+              {t("common.prev", "上一页")}
             </button>
             <span className="text-gray-400 text-xs sm:text-sm">
               {page} / {totalPages}
@@ -714,7 +716,7 @@ export default function Credentials() {
               disabled={page >= totalPages}
               className="btn btn-secondary text-xs px-3 py-1.5 disabled:opacity-40"
             >
-              下一页
+              {t("common.next", "下一页")}
             </button>
           </div>
         </div>
@@ -725,19 +727,19 @@ export default function Credentials() {
       {modelsModal && (
         <Modal
           type="info"
-          title={`支持模型列表 - ${modelsModal.email}`}
+          title={`${t("credentials.modelsModalTitle", "支持模型列表：{email}", { email: modelsModal.email })}`}
           onClose={() => setModelsModal(null)}
         >
           <div className="space-y-3">
             {busyFiles.has(modelsModal.email) ? (
               <div className="flex items-center justify-center py-6 text-gray-500">
                 <RefreshCw size={16} className="animate-spin mr-2" />
-                正在获取模型列表...
+                {t("credentials.fetchingModels", "正在获取模型列表...")}
               </div>
             ) : modelsModal.models?.length > 0 ? (
               <div className="space-y-2">
                 <div className="text-xs text-gray-400">
-                  共支持 {modelsModal.models.length} 个模型：
+                  {t("credentials.supportedModelsCount", `共支持 ${modelsModal.models.length} 个模型：`, { count: modelsModal.models.length })}
                 </div>
                 <div className="flex flex-wrap gap-1.5 max-h-60 overflow-y-auto p-2 bg-dark-900/60 border border-dark-700 rounded-lg">
                   {modelsModal.models.map((m) => (
@@ -752,7 +754,7 @@ export default function Credentials() {
               </div>
             ) : (
               <div className="text-center py-4 text-gray-500 text-sm">
-                尚未记录该凭证的模型列表，请点击下方按钮检测。
+                {t("credentials.noRecordedModels", "尚未记录该凭证的模型列表，请点击下方按钮检测。")}
               </div>
             )}
             <button
@@ -764,7 +766,7 @@ export default function Credentials() {
                 size={12}
                 className={busyFiles.has(modelsModal.email) ? "animate-spin" : ""}
               />
-              刷新模型列表
+              {t("credentials.refreshModelList", "刷新模型列表")}
             </button>
           </div>
         </Modal>

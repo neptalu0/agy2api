@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import api from "./api";
+import { LanguageSwitch, useI18n } from "./i18n";
 import Login from "./pages/Login";
 import OAuth from "./pages/OAuth";
 import Credentials from "./pages/Credentials";
@@ -18,6 +19,7 @@ import About from "./pages/About";
 import UsageLogs from "./pages/UsageLogs";
 
 export default function App() {
+  const { t } = useI18n();
   const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem("panelToken"));
   const [activeTab, setActiveTab] = useState("oauth");
   const [version, setVersion] = useState(null);
@@ -49,12 +51,12 @@ export default function App() {
   }
 
   const tabs = [
-    { id: "oauth", label: "OAuth 认证", icon: Rocket },
-    { id: "credentials", label: "凭证管理", icon: KeyRound },
-    { id: "upload", label: "批量导入", icon: Upload },
-    { id: "usage-logs", label: "请求日志", icon: BarChart3 },
-    { id: "config", label: "配置管理", icon: Settings },
-    { id: "about", label: "项目信息", icon: Info },
+    { id: "oauth", label: t("nav.oauth", "OAuth 认证"), icon: Rocket },
+    { id: "credentials", label: t("nav.credentials", "凭证管理"), icon: KeyRound },
+    { id: "upload", label: t("nav.upload", "批量导入"), icon: Upload },
+    { id: "usage-logs", label: t("nav.usageLogs", "请求日志"), icon: BarChart3 },
+    { id: "config", label: t("nav.config", "配置管理"), icon: Settings },
+    { id: "about", label: t("nav.about", "项目信息"), icon: Info },
   ];
 
   return (
@@ -71,13 +73,16 @@ export default function App() {
                 )}
               </div>
             </div>
-            <button
-              onClick={logout}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-1 sm:gap-2 text-sm"
-            >
-              <LogOut size={16} />
-              <span className="hidden sm:inline">退出登录</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <LanguageSwitch />
+              <button
+                onClick={logout}
+                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-1 sm:gap-2 text-sm"
+              >
+                <LogOut size={16} />
+                <span className="hidden sm:inline">{t("nav.logout", "退出登录")}</span>
+              </button>
+            </div>
           </div>
 
           {/* Tab 导航 */}

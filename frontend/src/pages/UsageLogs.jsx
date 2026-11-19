@@ -15,8 +15,7 @@ import { useCallback, useEffect, useState } from "react";
 import Modal from "../components/Modal";
 import Select from "../components/Select";
 import api from "../api";
-
-const PAGE_SIZES = [20, 50, 100, 200].map((n) => ({ value: n, label: `每页 ${n}` }));
+import { useI18n } from "../i18n";
 
 function formatTime(ts) {
   const d = new Date(ts * 1000);
@@ -41,6 +40,8 @@ function formatMaybeJson(text) {
 }
 
 export default function UsageLogs() {
+  const { t } = useI18n();
+  const PAGE_SIZES = [20, 50, 100, 200].map((n) => ({ value: n, label: t("usageLogs.perPage", `每页 ${n}`, { n }) }));
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [stats, setStats] = useState(null);
@@ -112,28 +113,28 @@ export default function UsageLogs() {
   };
 
   const clearLogs = async () => {
-    if (!window.confirm("确定要清理 3 天前的日志吗？此操作不可恢复。")) return;
+    if (!window.confirm(t("usageLogs.confirmClear3Days", "确定要清理 3 天前的日志吗？此操作不可恢复。"))) return;
     setClearing(true);
     try {
       const res = await api.post("/usage-logs/clear", null, { params: { days: 3 } });
-      setMessage({ type: "success", text: res.data.message || "清理成功" });
+      setMessage({ type: "success", text: res.data.message || t("common.success", "清理成功") });
       refresh();
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.detail || "清理失败" });
+      setMessage({ type: "error", text: err.response?.data?.detail || t("common.error", "清理失败") });
     } finally {
       setClearing(false);
     }
   };
 
   const truncateLogs = async () => {
-    if (!window.confirm("确定要清空全部请求日志吗？\n整张日志表将被删除重建，不留任何残留，此操作不可恢复。")) return;
+    if (!window.confirm(t("usageLogs.confirmTruncate", "确定要清空全部请求日志吗？\n整张日志表将被删除重建，不留任何残留，此操作不可恢复。"))) return;
     setClearing(true);
     try {
       const res = await api.post("/usage-logs/truncate");
-      setMessage({ type: "success", text: res.data.message || "已清空全部日志" });
+      setMessage({ type: "success", text: res.data.message || t("common.success", "已清空全部日志") });
       refresh();
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.detail || "清空失败" });
+      setMessage({ type: "error", text: err.response?.data?.detail || t("common.error", "清空失败") });
     } finally {
       setClearing(false);
     }
@@ -194,7 +195,7 @@ export default function UsageLogs() {
             </div>
             <div className="min-w-0">
               <div className="text-xl font-bold">{stats.total_requests}</div>
-              <div className="text-xs text-gray-500">总请求</div>
+              <div className="text-xs text-gray-500">{t("usageLogs.totalRequests", "总请求")}</div>
             </div>
           </div>
           <div className="card p-4 flex items-center gap-3">
@@ -203,7 +204,7 @@ export default function UsageLogs() {
             </div>
             <div className="min-w-0">
               <div className="text-xl font-bold text-green-400">{stats.success_count}</div>
-              <div className="text-xs text-gray-500">成功</div>
+              <div className="text-xs text-gray-500">{t("usageLogs.successCount", "成功")}</div>
             </div>
           </div>
           <div className="card p-4 flex items-center gap-3">
@@ -212,7 +213,7 @@ export default function UsageLogs() {
             </div>
             <div className="min-w-0">
               <div className="text-xl font-bold text-red-400">{stats.error_count}</div>
-              <div className="text-xs text-gray-500">失败</div>
+              <div className="text-xs text-gray-500">{t("usageLogs.failedCount", "失败")}</div>
             </div>
           </div>
           <div className="card p-4 flex items-center gap-3">
@@ -222,7 +223,7 @@ export default function UsageLogs() {
             <div className="min-w-0">
               <div className="text-xl font-bold">{formatTokens(stats.total_tokens)}</div>
               <div className="text-xs text-gray-500">
-                总 Tokens{stats.cached_tokens > 0 ? `（缓存 ${formatTokens(stats.cached_tokens)}）` : ""}
+                {t("usageLogs.totalTokens", "总 Tokens")}{stats.cached_tokens > 0 ? t("usageLogs.cachedTokens", `（缓存 ${formatTokens(stats.cached_tokens)}）`, { count: formatTokens(stats.cached_tokens) }) : ""}
               </div>
             </div>
           </div>
@@ -233,21 +234,21 @@ export default function UsageLogs() {
       <div className="flex flex-wrap items-center gap-2">
         <button onClick={refresh} disabled={loading} className="btn btn-secondary text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-1.5">
           <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          刷新
+          {t("common.refresh", "刷新")}
         </button>
         <button onClick={clearLogs} disabled={clearing} className="btn btn-secondary text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-1.5">
           {clearing ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
-          清理3天前日志
+          {t("usageLogs.clearLogs", "清理3天前日志")}
         </button>
         <button onClick={truncateLogs} disabled={clearing} className="btn btn-danger text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-1.5">
           <Trash2 size={15} />
-          清空全部日志
+          {t("usageLogs.truncateLogs", "清空全部日志")}
         </button>
       </div>
 
       {/* 消息弹窗 */}
       {message && (
-        <Modal type={message.type} title={message.type === "success" ? "操作成功" : "操作失败"} onClose={() => setMessage(null)}>
+        <Modal type={message.type} title={message.type === "success" ? t("common.success", "操作成功") : t("common.error", "操作失败")} onClose={() => setMessage(null)}>
           <span className="whitespace-pre-wrap break-all">{message.text}</span>
         </Modal>
       )}
@@ -259,12 +260,12 @@ export default function UsageLogs() {
           onChange={(v) => { setRangeHours(Number(v)); setPage(1); }}
           className="w-full sm:w-32"
           options={[
-            { value: 1, label: "最近 1 小时" },
-            { value: 6, label: "最近 6 小时" },
-            { value: 24, label: "最近 24 小时" },
-            { value: 24 * 7, label: "最近 7 天" },
-            { value: 24 * 30, label: "最近 30 天" },
-            { value: 0, label: "全部时间" },
+            { value: 1, label: t("usageLogs.range1h", "最近 1 小时") },
+            { value: 6, label: t("usageLogs.range6h", "最近 6 小时") },
+            { value: 24, label: t("usageLogs.range24h", "最近 24 小时") },
+            { value: 24 * 7, label: t("usageLogs.range7d", "最近 7 天") },
+            { value: 24 * 30, label: t("usageLogs.range30d", "最近 30 天") },
+            { value: 0, label: t("usageLogs.rangeAll", "全部时间") },
           ]}
         />
         <Select
@@ -272,9 +273,9 @@ export default function UsageLogs() {
           onChange={(v) => { setStatusFilter(v); setPage(1); }}
           className="w-full sm:w-32"
           options={[
-            { value: "all", label: "状态: 全部" },
-            { value: "success", label: "仅成功" },
-            { value: "error", label: "仅失败" },
+            { value: "all", label: t("usageLogs.statusAll", "状态: 全部") },
+            { value: "success", label: t("usageLogs.filterSuccess", "仅成功") },
+            { value: "error", label: t("usageLogs.filterErrors", "仅失败") },
           ]}
         />
         <Select
@@ -282,7 +283,7 @@ export default function UsageLogs() {
           onChange={(v) => { setFormatFilter(v); setPage(1); }}
           className="w-full sm:w-32"
           options={[
-            { value: "", label: "格式: 全部" },
+            { value: "", label: t("usageLogs.formatAll", "格式: 全部") },
             { value: "openai", label: "OpenAI" },
             { value: "gemini", label: "Gemini" },
             { value: "anthropic", label: "Claude" },
@@ -291,13 +292,13 @@ export default function UsageLogs() {
         <input
           value={modelFilter}
           onChange={(e) => { setModelFilter(e.target.value); setPage(1); }}
-          placeholder="模型名筛选"
+          placeholder={t("usageLogs.modelPlaceholder", "模型名筛选")}
           className="w-full sm:w-40 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-200 text-xs sm:text-sm placeholder-gray-500"
         />
         <input
           value={statusCodeFilter}
           onChange={(e) => { setStatusCodeFilter(e.target.value); setPage(1); }}
-          placeholder="错误码筛选"
+          placeholder={t("usageLogs.statusCodePlaceholder", "错误码筛选")}
           inputMode="numeric"
           className="w-full sm:w-28 bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-200 text-xs sm:text-sm placeholder-gray-500"
         />
@@ -315,7 +316,7 @@ export default function UsageLogs() {
           <Loader2 className="animate-spin text-purple-500" size={28} />
         </div>
       ) : items.length === 0 ? (
-        <div className="card p-8 text-center text-gray-500">暂无请求日志</div>
+        <div className="card p-8 text-center text-gray-500">{t("usageLogs.noLogs", "暂无请求日志")}</div>
       ) : (
         <div className="space-y-2">
           {items.map((item) => (
@@ -328,7 +329,7 @@ export default function UsageLogs() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-xs px-1.5 py-0.5 rounded ${item.success ? "bg-green-500/15 text-green-400" : "bg-red-500/15 text-red-400"}`}>
-                      {item.success ? "✓ 成功" : `✗ ${item.status_code || "失败"}`}
+                      {item.success ? `✓ ${t("usageLogs.successCount", "成功")}` : `✗ ${item.status_code || t("usageLogs.failedCount", "失败")}`}
                     </span>
                     <span className="text-sm font-medium text-gray-200 truncate">{item.model_name || "(unknown)"}</span>
                       {item.upstream_model_name && item.upstream_model_name !== item.model_name && (
@@ -337,8 +338,8 @@ export default function UsageLogs() {
                       <span className="text-xs px-1.5 py-0.5 rounded bg-dark-700 text-gray-400">
                         {item.api_format === "openai" ? "OpenAI" : item.api_format === "gemini" ? "Gemini" : item.api_format === "anthropic" ? "Claude" : item.api_format || "?"}
                       </span>
-                      {item.is_stream && <span className="text-xs px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">流式</span>}
-                      {item.request_log_file && <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">详细</span>}
+                      {item.is_stream && <span className="text-xs px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">{t("usageLogs.streamBadge", "流式")}</span>}
+                      {item.request_log_file && <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">{t("usageLogs.detailBadge", "详细")}</span>}
                     </div>
                   <div className="text-xs text-gray-500 mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
                     <span className="flex items-center gap-1"><Clock size={11} />{formatTime(item.created_at)}</span>
@@ -353,7 +354,7 @@ export default function UsageLogs() {
                   </div>
                   {item.cached_tokens > 0 && (
                     <div className="text-emerald-500/80" title="Prompt 中命中缓存的 token">
-                      ⚡缓存 {formatTokens(item.cached_tokens)}
+                      {t("usageLogs.cachedBadge", `⚡缓存 ${formatTokens(item.cached_tokens)}`, { tokens: formatTokens(item.cached_tokens) })}
                     </div>
                   )}
                 </div>
@@ -366,14 +367,14 @@ export default function UsageLogs() {
       {/* 分页 */}
       {total > 0 && (
         <div className="flex items-center justify-between text-sm text-gray-400">
-          <span>共 {total} 条</span>
+          <span>{t("common.total", "共 {count} 条", { count: total })}</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
               className="btn btn-secondary text-xs px-3 py-1.5 disabled:opacity-40"
             >
-              上一页
+              {t("common.prev", "上一页")}
             </button>
             <span>{page} / {totalPages}</span>
             <button
@@ -381,7 +382,7 @@ export default function UsageLogs() {
               disabled={page >= totalPages}
               className="btn btn-secondary text-xs px-3 py-1.5 disabled:opacity-40"
             >
-              下一页
+              {t("common.next", "下一页")}
             </button>
           </div>
         </div>
@@ -392,25 +393,25 @@ export default function UsageLogs() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setDetail(null)}>
           <div className="card max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-purple-400">请求详情</h3>
+              <h3 className="text-base font-semibold text-purple-400">{t("usageLogs.logDetailTitle", "请求详情")}</h3>
               <button onClick={() => setDetail(null)} className="text-gray-400 hover:text-white">✕</button>
             </div>
             <div className="space-y-2 text-sm">
               {[
-                ["时间", formatTime(detail.created_at)],
-                ["请求 ID", detail.request_id || "-"],
-                ["状态", detail.success ? "成功" : `失败 (${detail.status_code})`],
-                ["API 格式", detail.api_format || "-"],
-                ["客户端 IP", detail.client_ip || "-"],
-                ["请求模型", detail.model_name || "-"],
-                ["真实模型", detail.upstream_model_name || detail.model_name || "-"],
-                ["凭证", detail.credential_email || "-"],
-                ["流式", detail.is_stream ? "是" : "否"],
-                ["耗时", `${(detail.use_time || 0).toFixed(2)}s`],
+                [t("usageLogs.colTime", "时间"), formatTime(detail.created_at)],
+                ["Request ID", detail.request_id || "-"],
+                [t("common.status", "状态"), detail.success ? t("usageLogs.successCount", "成功") : `${t("usageLogs.failedCount", "失败")} (${detail.status_code})`],
+                ["API", detail.api_format || "-"],
+                [t("usageLogs.colIp", "客户端 IP"), detail.client_ip || "-"],
+                [t("usageLogs.filterModel", "请求模型"), detail.model_name || "-"],
+                [t("about.realtimeMonitor", "真实模型"), detail.upstream_model_name || detail.model_name || "-"],
+                [t("nav.credentials", "凭证"), detail.credential_email || "-"],
+                [t("usageLogs.streamBadge", "流式"), detail.is_stream ? "✓" : "-"],
+                [t("usageLogs.colLatency", "耗时"), `${(detail.use_time || 0).toFixed(2)}s`],
                 ["Prompt Tokens", String(detail.prompt_tokens)],
                 ["Completion Tokens", String(detail.completion_tokens)],
                 ["Total Tokens", String(detail.total_tokens)],
-                ...(detail.cached_tokens > 0 ? [["缓存 Tokens", String(detail.cached_tokens)]] : []),
+                ...(detail.cached_tokens > 0 ? [[t("usageLogs.cachedBadge", "缓存 Tokens", { tokens: "" }), String(detail.cached_tokens)]] : []),
               ].map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-4 border-b border-dark-700 pb-1.5">
                   <span className="text-gray-500 shrink-0">{k}</span>
@@ -419,7 +420,7 @@ export default function UsageLogs() {
               ))}
               {detail.error_message && (
                 <div>
-                  <div className="text-gray-500 mb-1">错误信息</div>
+                  <div className="text-gray-500 mb-1">{t("usageLogs.colError", "错误信息")}</div>
                   <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2.5 text-xs text-red-300 break-all">
                     {detail.error_message}
                   </div>
@@ -428,18 +429,18 @@ export default function UsageLogs() {
               {detail.request_log_file && (
                 <div className="pt-2">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="text-gray-500">请求体详细日志</div>
+                    <div className="text-gray-500">{t("usageLogs.requestBodyDetail", "请求体详细日志")}</div>
                     <button
                       onClick={openRequestBody}
                       disabled={detailBodyLoading}
                       className="btn btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5"
                     >
                       {detailBodyLoading ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
-                      查看详细内容
+                      {t("usageLogs.viewDetailedBody", "查看详细内容")}
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1.5">
-                    命中指定错误码时保存了发往上游的完整请求头与请求体，用于排查请求体错误（如 400）
+                    {t("usageLogs.detailedBodyNote", "命中指定错误码时保存，用于排查请求体错误：完整记录发往上游的请求头（已脱敏）与请求体。响应体为上游返回的原始错误。")}
                   </p>
                 </div>
               )}
@@ -456,23 +457,23 @@ export default function UsageLogs() {
               <div className="py-8 text-center text-sm text-gray-400">
                 <AlertTriangle size={28} className="mx-auto mb-3 text-amber-400" />
                 <div>{detailBody.__message}</div>
-                <div className="text-xs text-gray-500 mt-2">磁盘上的详细日志文件可能已被清理或手动删除</div>
+                <div className="text-xs text-gray-500 mt-2">{t("usageLogs.diskCleanedWarning", "磁盘上的详细日志文件可能已被清理或手动删除")}</div>
               </div>
             ) : (
               <>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-semibold text-purple-400">请求体详细日志</h3>
+              <h3 className="text-base font-semibold text-purple-400">{t("usageLogs.requestBodyDetail", "请求体详细日志")}</h3>
               <div className="flex items-center gap-2">
-                {copyStatus === "ok" && <span className="text-xs text-green-400">已复制</span>}
-                {copyStatus === "fail" && <span className="text-xs text-red-400">复制失败</span>}
+                {copyStatus === "ok" && <span className="text-xs text-green-400">{t("common.copied", "已复制")}</span>}
+                {copyStatus === "fail" && <span className="text-xs text-red-400">{t("common.error", "复制失败")}</span>}
                 <button onClick={copyDetailBody} className="btn btn-secondary text-xs px-3 py-1.5">
-                  复制 JSON
+                  {t("usageLogs.copyJson", "复制 JSON")}
                 </button>
                 <button onClick={() => setDetailBody(null)} className="text-gray-400 hover:text-white">✕</button>
               </div>
             </div>
             <p className="text-xs text-gray-500 mb-3">
-              命中指定错误码时保存，用于排查请求体错误：完整记录发往上游的请求头（已脱敏）与请求体。响应体为上游返回的原始错误。
+              {t("usageLogs.detailedBodyNote", "命中指定错误码时保存，用于排查请求体错误：完整记录发往上游的请求头（已脱敏）与请求体。响应体为上游返回的原始错误。")}
             </p>
             <div className="space-y-3 text-xs">
               <div>
