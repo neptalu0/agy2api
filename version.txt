@@ -1,4 +1,4 @@
-full_hash=0fee3616d133e6b607b54d9ccc6d2c18aa8e7070
-short_hash=0fee361
-message=Merge remote-tracking branch 'origin/master'
-date=2026-11-19 16:49:27 +0800
+full_hash=2e092a4eff633cb570210234b480c428b66d43e3
+short_hash=2e092a4
+message=feat: add en/zh i18n support to frontend and update dist bundle
+date=2026-11-19 18:19:59 +0800
