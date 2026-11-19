@@ -40,7 +40,7 @@ function formatMaybeJson(text) {
 }
 
 export default function UsageLogs() {
-  const { t } = useI18n();
+  const { t, translateMessage } = useI18n();
   const PAGE_SIZES = [20, 50, 100, 200].map((n) => ({ value: n, label: t("usageLogs.perPage", `每页 ${n}`, { n }) }));
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
@@ -117,10 +117,10 @@ export default function UsageLogs() {
     setClearing(true);
     try {
       const res = await api.post("/usage-logs/clear", null, { params: { days: 3 } });
-      setMessage({ type: "success", text: res.data.message || t("common.success", "清理成功") });
+      setMessage({ type: "success", text: t("usageLogs.clearedDaysSuccess", "已清理 3 天前的日志", { days: 3 }) });
       refresh();
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.detail || t("common.error", "清理失败") });
+      setMessage({ type: "error", text: (err.response?.data?.detail ? translateMessage(err.response.data.detail) : null) || t("common.error", "清理失败") });
     } finally {
       setClearing(false);
     }
@@ -131,10 +131,10 @@ export default function UsageLogs() {
     setClearing(true);
     try {
       const res = await api.post("/usage-logs/truncate");
-      setMessage({ type: "success", text: res.data.message || t("common.success", "已清空全部日志") });
+      setMessage({ type: "success", text: t("usageLogs.truncatedSuccess", "已清空全部日志") });
       refresh();
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.detail || t("common.error", "清空失败") });
+      setMessage({ type: "error", text: (err.response?.data?.detail ? translateMessage(err.response.data.detail) : null) || t("common.error", "清空失败") });
     } finally {
       setClearing(false);
     }

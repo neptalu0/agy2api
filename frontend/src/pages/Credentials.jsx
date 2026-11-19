@@ -22,7 +22,7 @@ import api from "../api";
 import { useI18n } from "../i18n";
 
 export default function Credentials() {
-  const { t, lang } = useI18n();
+  const { t, lang, translateMessage } = useI18n();
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState({ total: 0, normal: 0, disabled: 0 });
   const [total, setTotal] = useState(0);
@@ -79,8 +79,14 @@ export default function Credentials() {
   }, [fetchCreds]);
 
   const showMessage = useCallback((type, text, title) => {
-    setMessage({ type, text, title: title || (type === "success" ? t("common.success", "操作成功") : type === "error" ? t("common.error", "操作失败") : t("common.info", "提示")) });
-  }, [t]);
+    setMessage({
+      type,
+      text: typeof text === "string" ? translateMessage(text) : text,
+      title: title
+        ? (typeof title === "string" ? translateMessage(title) : title)
+        : (type === "success" ? t("common.success", "操作成功") : type === "error" ? t("common.error", "操作失败") : t("common.info", "提示")),
+    });
+  }, [t, translateMessage]);
 
   const setBusy = (email, busy) => {
     setBusyFiles((prev) => {
@@ -95,7 +101,15 @@ export default function Credentials() {
     setBusy(email, true);
     try {
       const res = await api.post("/creds/action", { email, action });
-      showMessage("success", res.data.message);
+      const actionText =
+        action === "enable"
+          ? t("credentials.actionEnabled", "已启用凭证 {email}", { email })
+          : action === "disable"
+          ? t("credentials.actionDisabled", "已禁用凭证 {email}", { email })
+          : action === "delete"
+          ? t("credentials.actionDeleted", "已删除凭证 {email}", { email })
+          : translateMessage(res.data.message);
+      showMessage("success", actionText);
       fetchCreds();
     } catch (err) {
       showMessage("error", err.response?.data?.detail || t("credentials.actionFailed", "操作失败"));
@@ -112,7 +126,12 @@ export default function Credentials() {
         action,
         emails: Array.from(selected),
       });
-      showMessage(res.data.errors?.length ? "error" : "success", res.data.message);
+      let msg = translateMessage(res.data.message);
+      if (res.data.errors?.length) {
+        const translatedErrors = res.data.errors.map((e) => translateMessage(String(e))).join("\n");
+        msg = `${msg}\n\n${translatedErrors}`;
+      }
+      showMessage(res.data.errors?.length ? "error" : "success", msg);
       fetchCreds();
     } catch (err) {
       showMessage("error", err.response?.data?.detail || t("credentials.batchActionFailed", "批量操作失败"));
@@ -176,9 +195,12 @@ export default function Credentials() {
     try {
       const res = await api.post(`/creds/test/${encodeURIComponent(email)}`);
       // 200 = 可用；429 = 限流但有效
+      const testMsg = res.status === 429
+        ? t("credentials.rateLimitedButValid", "凭证被限流（429）但有效")
+        : t("credentials.testPassed", "凭证测试通过");
       showMessage(
         "success",
-        res.data.message || (res.status === 429 ? t("credentials.rateLimitedButValid", "凭证被限流（429）但有效") : t("credentials.testPassed", "凭证测试通过")),
+        testMsg,
         `${t("credentials.testSuccess", "测试成功")}: ${email}`
       );
       fetchCreds();
@@ -189,7 +211,7 @@ export default function Credentials() {
       const upstreamError = data.error || data.detail || data.message || t("credentials.testFailed", "测试失败");
       showMessage(
         status === 429 ? "info" : "error",
-        `HTTP ${status}\n${upstreamError}`,
+        `HTTP ${status}\n${typeof upstreamError === "string" ? translateMessage(upstreamError) : JSON.stringify(upstreamError)}`,
         `${t("credentials.testFailed", "测试失败")}: ${email}`
       );
       fetchCreds();

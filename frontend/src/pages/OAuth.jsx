@@ -5,7 +5,7 @@ import api from "../api";
 import { useI18n } from "../i18n";
 
 export default function OAuth() {
-  const { t } = useI18n();
+  const { t, translateMessage } = useI18n();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [authUrl, setAuthUrl] = useState("");
@@ -28,7 +28,7 @@ export default function OAuth() {
     } catch (err) {
       setMessage({
         type: "error",
-        text: err.response?.data?.detail || t("oauth.authFailed", "获取认证链接失败"),
+        text: (err.response?.data?.detail ? translateMessage(err.response.data.detail) : null) || t("oauth.authFailed", "获取认证链接失败"),
       });
     } finally {
       setLoading(false);
@@ -47,7 +47,7 @@ export default function OAuth() {
     } catch (err) {
       setMessage({
         type: "error",
-        text: err.response?.data?.detail || t("oauth.authFailed", "获取凭证失败，请确认已完成授权"),
+        text: (err.response?.data?.detail ? translateMessage(err.response.data.detail) : null) || t("oauth.authFailed", "获取凭证失败，请确认已完成授权"),
       });
     } finally {
       setFetching(false);
@@ -72,7 +72,7 @@ export default function OAuth() {
     } catch (err) {
       setMessage({
         type: "error",
-        text: err.response?.data?.detail || t("oauth.authFailed", "从回调URL获取凭证失败"),
+        text: (err.response?.data?.detail ? translateMessage(err.response.data.detail) : null) || t("oauth.authFailed", "从回调URL获取凭证失败"),
       });
     } finally {
       setFetching(false);

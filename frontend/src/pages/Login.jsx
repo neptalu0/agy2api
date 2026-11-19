@@ -4,7 +4,7 @@ import api from "../api";
 import { LanguageSwitch, useI18n } from "../i18n";
 
 export default function Login({ onSuccess }) {
-  const { t } = useI18n();
+  const { t, translateMessage } = useI18n();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -20,7 +20,7 @@ export default function Login({ onSuccess }) {
       localStorage.setItem("panelToken", res.data.token);
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.detail || t("login.failed", "登录失败"));
+      setError((err.response?.data?.detail ? translateMessage(err.response.data.detail) : null) || t("login.failed", "登录失败"));
     } finally {
       setLoading(false);
     }

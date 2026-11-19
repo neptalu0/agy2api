@@ -204,7 +204,7 @@ const CONFIG_GROUPS = [
 ];
 
 export default function Config() {
-  const { t } = useI18n();
+  const { t, translateMessage } = useI18n();
   const [config, setConfig] = useState({});
   const [envLocked, setEnvLocked] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -223,7 +223,7 @@ export default function Config() {
       setEnvLocked(res.data.env_locked || []);
       if (!silent) setMessage(null);
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.detail || t("config.loadFailed", "加载配置失败") });
+      setMessage({ type: "error", text: (err.response?.data?.detail ? translateMessage(err.response.data.detail) : null) || t("config.loadFailed", "加载配置失败") });
     } finally {
       setLoading(false);
     }
@@ -233,11 +233,11 @@ export default function Config() {
     setSaving(true);
     try {
       const res = await api.post("/config/save", { config });
-      setMessage({ type: "success", text: res.data.message || t("config.saved", "配置保存成功") });
+      setMessage({ type: "success", text: t("config.saved", "配置保存成功") });
       // 静默刷新配置（不清空刚显示的弹窗消息）
       await loadConfig({ silent: true });
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.detail || t("config.saveFailed", "保存配置失败") });
+      setMessage({ type: "error", text: (err.response?.data?.detail ? translateMessage(err.response.data.detail) : null) || t("config.saveFailed", "保存配置失败") });
     } finally {
       setSaving(false);
     }

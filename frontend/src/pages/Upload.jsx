@@ -4,7 +4,7 @@ import api from "../api";
 import { useI18n } from "../i18n";
 
 export default function UploadPage() {
-  const { t } = useI18n();
+  const { t, translateMessage } = useI18n();
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [results, setResults] = useState(null);
@@ -41,7 +41,7 @@ export default function UploadPage() {
       setResults(res.data);
     } catch (err) {
       setResults({
-        error: err.response?.data?.detail || t("upload.uploadFailed", "上传失败"),
+        error: (err.response?.data?.detail ? translateMessage(err.response.data.detail) : null) || t("upload.uploadFailed", "上传失败"),
       });
     } finally {
       setUploading(false);
@@ -174,7 +174,7 @@ export default function UploadPage() {
             <>
               <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg flex items-center gap-2">
                 <CheckCircle size={16} />
-                {results.message ||
+                {translateMessage(results.message) ||
                   t("upload.uploadSuccess", "导入完成：成功 {success} 个，共 {total} 个", { success: successCount, total: totalCount })}
               </div>
               {results.results?.some((r) => r.status === "error") && (
@@ -187,7 +187,7 @@ export default function UploadPage() {
                         key={i}
                         className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs px-3 py-2 rounded-lg"
                       >
-                        <span className="font-medium">{r.filename}</span>: {r.message}
+                        <span className="font-medium">{r.filename}</span>: {translateMessage(r.message)}
                       </div>
                     ))}
                 </div>
